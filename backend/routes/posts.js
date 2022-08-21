@@ -15,7 +15,7 @@ router.put("/:id", async (req, res) => {
   try {
     const post = Post.findById(req.params.id);
     if (post.userId === req.body.userId) {
-//This I think makes no sense to me, the dude is asking the machine to recognize that the userId of the post that is in the url bar is the same as the userId (of the user who wants to edit the post) that we place in the request Json in Postman(right?). Instead we want the post id or req.params.id to match an existing id (and I dont see shadow of that error handling here). Additionally, we want the user to be authorised so the userId to whom the post belongs, should match the userId of the user wanting to edit. 
+//This I think makes no sense to me, the dude is asking the machine to recognize that the userId of the post that is in the url bar is the same as the userId (of the user who wants to edit the post) that we place in the request Json in Postman(right?). Instead we want the post id or req.params.id to match an existing id (and I dont see shadow of that error handling here). Additionally, we want the user to be authorised so the userId to whom the post belongs, should match the userId of the user wanting to edit. /
     await post.updateOne({$set:req.body});
     res.status(200).json("The post has been updated")
     } else {
