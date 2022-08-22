@@ -43,7 +43,6 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id/likes", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    //dot notation is the same also in the case of arrays, which I find cool ,I thought some spread op was gonna come up.
     if (!post.likes.includes(req.body.userId)) {
       await post.updateOne({ $push: { likes: req.body.userId } });
       res.status(200).json("Liked!");
@@ -65,11 +64,11 @@ router.get("/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
-//get timeline posts (get all posts from a user and all those whom the user is following)
+//get timeline posts (get all posts from a user and all those users whom the user is following)
 router.get("/timeline/all", async (req, res) => {
   try {
     const currentUser = await User.findById(req.body.userId);
-    const userPosts = await Post.find({ userId: currentUser._id }); //why??? Oh is this a way to tell the machine: just find the userIds of posts that a user with this Users(userId) has posted..?
+    const userPosts = await Post.find({ userId: currentUser._id }); 
     const friendPosts = await Promise.all(
       currentUser.following.map((friendId) => {
         return Post.find({ userId: friendId });
