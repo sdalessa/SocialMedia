@@ -13,11 +13,11 @@ router.post("/", async (req, res) => {
 //update post
 router.put("/:id", async (req, res) => {
   try {
-    const post = Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id);
     if (post.userId === req.body.userId) {
-//This I think makes no sense to me, the dude is asking the machine to recognize that the userId of the post that is in the url bar is the same as the userId (of the user who wants to edit the post) that we place in the request Json in Postman(right?). Instead we want the post id or req.params.id to match an existing id (and I dont see shadow of that error handling here). Additionally, we want the user to be authorised so the userId to whom the post belongs, should match the userId of the user wanting to edit. 
-    await post.updateOne({$set:req.body});
-    res.status(200).json("The post has been updated")
+      //note 10
+      await post.updateOne({ $set: req.body });
+      res.status(200).json("The post has been updated");
     } else {
       res.status(403).json("you can only update your own posts");
     }
@@ -27,20 +27,57 @@ router.put("/:id", async (req, res) => {
 });
 //delete post
 router.delete("/:id", async (req, res) => {
-    try {
-      const post = Post.findById(req.params.id);
-      if (post.userId === req.body.userId) {
-      await post.deleteOne({$set: req.body});
-      res.status(200).json("The post has been deleted")
-      } else {
-        res.status(403).json("you can only delete your own posts");
-      }
-    } catch (err) {
-      res.status(500).json(err);
+  try {
+    const post = await Post.findById(req.params.id);
+    if (post.userId === req.body.userId) {
+      await post.deleteOne();
+      res.status(200).json("The post has been deleted");
+    } else {
+      res.status(403).json("you can only delete your own posts");
+    } // note 11
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+//like / dislike post
+router.put("/:id/likes", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    //dot notation is the same also in the case of arrays, which I find cool ,I thought some spread op was gonna come up.
+    if (!post.likes.includes(req.body.userId)) {
+      await post.updateOne({ $push: { likes: req.body.userId } });
+      res.status(200).json("Liked!");
+    } else {
+      await post.updateOne({ $pull: { likes: req.body.userId } });
+      res.status(200).json("Unliked!");
     }
-  });
-//like post
+    //note 12 about diff experience followers vs likes
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 //get post
-//get all posts (1 user's)
-
+router.get("/:id", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    res.status(200).json(post);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+//get timeline posts (get all posts from a user and all those whom the user is following)
+router.get("/timeline/all", async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.body.userId);
+    const userPosts = await Post.find({ userId: currentUser._id }); //why??? Oh is this a way to tell the machine: just find the userIds of posts that a user with this Users(userId) has posted..?
+    const friendPosts = await Promise.all(
+      currentUser.following.map((friendId) => {
+        return Post.find({ userId: friendId });
+      })
+    );
+    res.json(userPosts.concat(...friendPosts));
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 module.exports = router;
