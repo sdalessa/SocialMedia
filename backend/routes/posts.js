@@ -43,7 +43,6 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id/likes", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    //dot notation is the same also in the case of arrays, which I find cool ,I thought some spread op was gonna come up.
     if (!post.likes.includes(req.body.userId)) {
       await post.updateOne({ $push: { likes: req.body.userId } });
       res.status(200).json("Liked!");
@@ -65,19 +64,24 @@ router.get("/:id", async (req, res) => {
     res.status(500).json(err);
   }
 });
-//get timeline posts (get all posts from a user and all those whom the user is following)
+//get timeline posts (get all posts from a user and all those users whom the user is following)
 router.get("/timeline/all", async (req, res) => {
   try {
+
+
     //find the current user by looking at the req.body
     const currentUser = await User.findById(req.body.userId);
     // note 13
-    const userPosts = await Post.find({ userId: currentUser._id }); 
-    const friendPosts = await Promise.all(
-      currentUser.following.map((friendId) => {
-        return Post.find({ userId: friendId });
-      })
-    );
-    res.json(userPosts.concat(...friendPosts));
+    // const userPosts = await Post.find({ userId: currentUser._id }); 
+    const userPost = await Post.find(req.body.userId)
+    console.log(req.body)
+    // const friendPosts = await Promise.all(
+    //   currentUser.following.map((friendId) => {
+    //     return Post.find({ userId: friendId });
+    //   })
+    // );
+    // res.json(userPosts.concat(...friendPosts));
+    res.json(userPost)
   } catch (err) {
     res.status(500).json(err);
   }
