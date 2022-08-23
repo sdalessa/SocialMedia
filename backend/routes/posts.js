@@ -68,8 +68,10 @@ router.get("/:id", async (req, res) => {
 //get timeline posts (get all posts from a user and all those whom the user is following)
 router.get("/timeline/all", async (req, res) => {
   try {
+    //find the current user by looking at the req.body
     const currentUser = await User.findById(req.body.userId);
-    const userPosts = await Post.find({ userId: currentUser._id }); //why??? Oh is this a way to tell the machine: just find the userIds of posts that a user with this Users(userId) has posted..?
+    // note 13
+    const userPosts = await Post.find({ userId: currentUser._id }); 
     const friendPosts = await Promise.all(
       currentUser.following.map((friendId) => {
         return Post.find({ userId: friendId });
@@ -81,3 +83,5 @@ router.get("/timeline/all", async (req, res) => {
   }
 });
 module.exports = router;
+
+//
