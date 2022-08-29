@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Post = require("../models/Post");
+const User = require("../models/User")
 //create post
 router.post("/", async (req, res) => {
   const newPost = new Post(req.body);
@@ -65,23 +66,27 @@ router.get("/:id", async (req, res) => {
   }
 });
 //get timeline posts (get all posts from a user and all those users whom the user is following)
-router.get("/timeline/all", async (req, res) => {
+router.get("/timeline/all/:id", async (req, res) => {  //id from the currentUser that we are querying
   try {
-
-
     //find the current user by looking at the req.body
-    const currentUser = await User.findById(req.body.userId);
+    // console.log(req.params.id)
+    const currentUser = await User.findOne({_id: req.params.id});
+    // console.log(currentUser)
     // note 13
-    // const userPosts = await Post.find({ userId: currentUser._id }); 
-    const userPost = await Post.find(req.body.userId)
-    console.log(req.body)
-    // const friendPosts = await Promise.all(
-    //   currentUser.following.map((friendId) => {
-    //     return Post.find({ userId: friendId });
-    //   })
-    // );
-    // res.json(userPosts.concat(...friendPosts));
-    res.json(userPost)
+    const userPosts = await Post.find({ userId: currentUser._id }); 
+    // console.log(req.body)
+    // const userPost = await Post.findById(req.body.userId)
+    // const onePost = await Post.find({userId: currentUser.following[0]})
+    // console.log("onePost", onePost)
+    const friendPosts = await Promise.all(
+      currentUser.following.map((friendId) => {
+        return Post.find({ userId: friendId });
+      })
+    );
+    // console.log(friendPosts, "post")
+    res.json(userPosts.concat(...friendPosts));
+    // res.json(userPost)
+    // res.json(friendPosts)
   } catch (err) {
     res.status(500).json(err);
   }

@@ -11,3 +11,5 @@
 11. This delete endpoint so far only requires the id of the user and that this id is authorized to delete (must be the same id of the user who posted). This means that in the req.body you do not need to rewrite the desc (the content of the post that needs deleted).
 12. in the case of followers of users, we wanted to clarify the particular userId. We wanted to know WHO (which userId) is following whom. In the case of likes, I would only want to know if my user has already liked a post (we dont need anybody to know their id, we dont need the id to show. We just need the partic "liker" to not have liked twice)
 13. const currentUsersFollowing = await User.findById(req.body.) dont need first line, can put it inside friendspost, find user and find friends posts all in one operation. 
+//FRONTEND
+14. learned about webkit which can be used for both making a nicer vertical scroller, as well as for creating nice box shadowing effects. You can do this by using a free online box shadow generator!
